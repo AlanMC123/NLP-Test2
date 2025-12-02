@@ -1,0 +1,5 @@
+corpus/
+__pycache__/
+model_fasttext/
+model_lsa/
+model_word2vec/
