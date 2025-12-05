@@ -1,9 +1,16 @@
-Doc2Vec Model Evaluation on STSBenchmark
-============================================================
+Text Embedding Methods Comparison
+Methods: Summation, Weighted Avg (TF-IDF), Concatenation (Mean+Max)
+================================================================================
 
-Spearman Correlation: 0.3534
-P-value: 7.9274e-42
-Number of Samples: 1379
-
-============================================================
-Evaluation completed.
+Model + Method                           | Spearman   | P-value   
+--------------------------------------------------------------------------------
+Word2Vec + Weighted_Avg                  | 0.5272     | 1.73e-99
+GloVe + Weighted_Avg                     | 0.5267     | 2.95e-99
+FastText + Weighted_Avg                  | 0.5259     | 6.61e-99
+Word2Vec + Sum                           | 0.5044     | 7.21e-90
+GloVe + Sum                              | 0.5039     | 1.10e-89
+GloVe + Concat                           | 0.5002     | 3.30e-88
+Word2Vec + Concat                        | 0.4950     | 4.02e-86
+FastText + Sum                           | 0.4835     | 1.05e-81
+FastText + Concat                        | 0.4292     | 6.70e-63
+Doc2Vec                                  | 0.3979     | 1.58e-53

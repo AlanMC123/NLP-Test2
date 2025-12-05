@@ -47,6 +47,7 @@ def get_similarity(model, model_name, word1, word2):
         return None
 
 # 收集评分数据
+
 def collect_scores(models):
     scores = {}
     for model_name in models:
@@ -55,12 +56,17 @@ def collect_scores(models):
             'human_scores': []
         }
     
+    # 收集所有测试单词
+    all_test_words = set()
     print(f"Reading CSV file from {CSV_PATH}...")
     with open(CSV_PATH, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
             word1 = row['Word 1'].lower()
             word2 = row['Word 2'].lower()
+            all_test_words.add(word1)
+            all_test_words.add(word2)
+            
             human_score = float(row['Human (Mean)'])  # 原始0-10范围
             
             for model_name, model in models.items():
@@ -70,7 +76,21 @@ def collect_scores(models):
                     scores[model_name]['model_scores'].append(scaled_model_score)
                     scores[model_name]['human_scores'].append(human_score)
     
-    return scores
+    # 检查单词是否在模型的词汇表中
+    word_presence = {}
+    for word in all_test_words:
+        word_presence[word] = {}
+        for model_name, model in models.items():
+            try:
+                if model_name == 'glove':
+                    model[word]  # 检查单词是否在词汇表中
+                else:
+                    model.wv[word]  # 检查单词是否在词汇表中
+                word_presence[word][model_name] = True
+            except KeyError:
+                word_presence[word][model_name] = False
+    
+    return scores, word_presence
 
 # 计算Spearman相关系数
 def calculate_metrics(scores):
@@ -87,8 +107,19 @@ def calculate_metrics(scores):
             }
     return metrics
 
+# 找出FastText有而Word2Vec和GloVe没有的单词
+
+def find_fasttext_unique_words(word_presence):
+    fasttext_unique_words = []
+    for word, presence in word_presence.items():
+        # 检查条件：FastText有该单词，且Word2Vec和GloVe都没有
+        if presence['fasttext'] and not presence['word2vec'] and not presence['glove']:
+            fasttext_unique_words.append(word)
+    return sorted(fasttext_unique_words)
+
 # 输出结果
-def write_results(metrics):
+
+def write_results(metrics, fasttext_unique_words):
     os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
     
     with open(OUTPUT_PATH, 'w', encoding='utf-8') as f:
@@ -101,7 +132,19 @@ def write_results(metrics):
             f.write(f"- P-value: {metric['p_value']:.4e}\n")
             f.write(f"- Number of Samples: {metric['num_samples']}\n\n")
         
+        # 写入FastText独有的单词
+        f.write("\n" + "=" * 50 + "\n")
+        f.write("FastText Unique Words\n")
         f.write("=" * 50 + "\n")
+        f.write(f"Words that exist in FastText but not in Word2Vec or GloVe:\n")
+        f.write(f"Total: {len(fasttext_unique_words)}\n\n")
+        if fasttext_unique_words:
+            for word in fasttext_unique_words:
+                f.write(f"- {word}\n")
+        else:
+            f.write("No unique words found.\n")
+        
+        f.write("\n" + "=" * 50 + "\n")
         f.write("Evaluation completed.")
     
     print(f"Results saved to {OUTPUT_PATH}")
@@ -110,14 +153,17 @@ def main():
     # 加载模型
     models = load_models()
     
-    # 收集评分数据
-    scores = collect_scores(models)
+    # 收集评分数据和单词存在情况
+    scores, word_presence = collect_scores(models)
     
     # 计算Spearman相关系数
     metrics = calculate_metrics(scores)
     
+    # 找出FastText独有的单词
+    fasttext_unique_words = find_fasttext_unique_words(word_presence)
+    
     # 输出结果
-    write_results(metrics)
+    write_results(metrics, fasttext_unique_words)
     
     print("All tasks completed!")
 

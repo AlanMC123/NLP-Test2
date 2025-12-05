@@ -30,20 +30,8 @@ class TrainingProgressCallback(CallbackAny2Vec):
         print(f"Epoch {self.epoch + 1} completed")
         self.epoch += 1
 
-# 讀取停用詞
-def read_stopwords():
-    stopwords = set()
-    if os.path.exists(STOPWORDS_PATH):
-        with open(STOPWORDS_PATH, 'r', encoding='utf-8') as f:
-            for line in f:
-                stopwords.add(line.strip())
-    else:
-        print(f"Warning: Stopwords file not found at {STOPWORDS_PATH}. Proceeding without stopwords.")
-    return stopwords
-
 # 讀取語料庫 (已修復大小寫問題)
 def read_corpus():
-    stopwords = read_stopwords()
     corpus = []
     print(f"Reading corpus from {CORPUS_PATH}...")
     with open(CORPUS_PATH, 'r', encoding='utf-8') as f:
@@ -52,8 +40,8 @@ def read_corpus():
             # 這樣 'Queen' 和 'queen' 就會被視為同一個詞，解決 OOV 問題
             words = line.strip().lower().split()
             
-            # 過濾停用詞和長度小於2的詞
-            filtered_words = [word for word in words if word not in stopwords and len(word) >= 2]
+            # 只過濾長度小於2的詞，不再使用停用詞
+            filtered_words = [word for word in words if len(word) >= 2]
             if filtered_words:
                 corpus.append(filtered_words)
     return corpus
@@ -62,12 +50,13 @@ def read_corpus():
 def train_word2vec(corpus):
     print("\nTraining Word2Vec model...")
     callback = TrainingProgressCallback()
+    # 使用所有可用CPU核心加速训练
     model = Word2Vec(
         sentences=corpus,
         vector_size=100,
         window=5,
         min_count=5,
-        workers=4,
+        workers=os.cpu_count(),
         epochs=10,
         callbacks=[callback]
     )
@@ -87,7 +76,7 @@ def train_fasttext(corpus):
         vector_size=100,  # 向量維度
         window=5,         # 上下文窗口大小
         min_count=5,      # 過濾低頻詞
-        workers=4,
+        workers=os.cpu_count(),
         epochs=15,        # [建議增加] 增加訓練輪數，讓模型讀更多次語料，強化語義學習
         min_n=5,          # [關鍵修改] 原為3。提高到5，忽略過短的字根，減少"拼寫相似"的干擾
         max_n=6,          # [保持默認] 子詞最大長度
@@ -111,7 +100,7 @@ def train_glove(corpus):
         vector_size=100,
         window=5,
         min_count=5,
-        workers=4,
+        workers=os.cpu_count(),
         epochs=10,
         sg=0,  # 0 for CBOW
         callbacks=[callback]

@@ -1,40 +1,219 @@
 import os
 import re
 import json
+import math
 import numpy as np
+from collections import Counter
 from scipy.stats import spearmanr
+from gensim.models import Word2Vec, FastText, KeyedVectors
 from gensim.models.doc2vec import Doc2Vec
+from gensim.models.callbacks import CallbackAny2Vec 
 from nltk.tokenize import word_tokenize
 import nltk
 
-# 下载必要的nltk数据
+# 下載必要的 nltk 數據
 nltk.download('punkt', quiet=True)
 
-# 定义模型路径和测试数据路径
-MODEL_PATH = os.path.join('model_doc2vec', 'doc2vec_model.bin')
-TEST_DATA_PATH = os.path.join('test_dataset', 'STSBenchmark-test.jsonl')
-OUTPUT_PATH = os.path.join('output', 'dv_formal_test.txt')
+# ==========================================
+# 修復 Pickle 錯誤的 Callback 定義
+# ==========================================
+class TrainingProgressCallback(CallbackAny2Vec):
+    def __init__(self):
+        self.epoch = 0
+    def on_epoch_end(self, model):
+        pass
+# ==========================================
 
-# 加载停用词
+# 路徑配置
+MODEL_DIR = os.path.dirname(os.path.abspath(__file__))
+DOC2VEC_MODEL_PATH = os.path.join(MODEL_DIR, 'model_doc2vec', 'doc2vec_model.bin')
+WORD2VEC_MODEL_PATH = os.path.join(MODEL_DIR, 'model_word2vec', 'word2vec.model')
+FASTTEXT_MODEL_PATH = os.path.join(MODEL_DIR, 'model_fasttext', 'fasttext.model')
+GLOVE_MODEL_PATH = os.path.join(MODEL_DIR, 'model_glove', 'glove.kv')
+
+TEST_DATA_PATH = os.path.join(MODEL_DIR, 'test_dataset', 'STSBenchmark-test.jsonl')
+OUTPUT_PATH = os.path.join(MODEL_DIR, 'output', 'dv_formal_test.txt')
+
+# 加載停用詞
 stopwords = set()
-with open('baidu_stopwords.txt', 'r', encoding='utf-8') as f:
-    for line in f:
-        stopwords.add(line.strip())
+if os.path.exists('baidu_stopwords.txt'):
+    with open('baidu_stopwords.txt', 'r', encoding='utf-8') as f:
+        for line in f:
+            stopwords.add(line.strip())
 
 def preprocess_text(text):
-    """预处理文本"""
-    # 移除特殊字符和数字
     text = re.sub(r'[^a-zA-Z\s]', '', text)
-    # 转为小写
     text = text.lower()
-    # 分词
     tokens = word_tokenize(text)
-    # 去除停用词和空词
     tokens = [token for token in tokens if token not in stopwords and token.strip()]
     return tokens
 
+# === 1. 計算 IDF (用於加權平均) ===
+class IDFCalculator:
+    def __init__(self, sentences):
+        self.doc_count = 0
+        self.df = Counter()
+        self.build_vocab(sentences)
+        
+    def build_vocab(self, sentences):
+        print("Building IDF dictionary from test data...")
+        for sent in sentences:
+            self.doc_count += 1
+            # 使用 set 去重，確保一個詞在一個句子中只計數一次 (Document Frequency)
+            tokens = set(preprocess_text(sent))
+            for token in tokens:
+                self.df[token] += 1
+    
+    def get_weight(self, word):
+        # IDF = log(N / (df + 1))
+        # 如果詞沒出現過，給予一個較大的預設 IDF 值 (或者忽略)
+        df_val = self.df.get(word, 0)
+        return math.log((self.doc_count + 1) / (df_val + 1))
+
+# === 2. 文本向量生成方法 ===
+
+def get_sentence_vec_sum(tokens, wv):
+    """方法 A: 詞向量相加 (Summation)"""
+    vectors = [wv[t] for t in tokens if t in wv]
+    if not vectors:
+        return np.zeros(wv.vector_size)
+    return np.sum(vectors, axis=0)
+
+def get_sentence_vec_weighted_avg(tokens, wv, idf_model):
+    """方法 B: 詞向量加權平均 (Weighted Average, using IDF)"""
+    vectors = []
+    weights = []
+    for t in tokens:
+        if t in wv:
+            vectors.append(wv[t])
+            # 獲取 IDF 權重，如果沒有 IDF 模型則默認為 1.0
+            w = idf_model.get_weight(t) if idf_model else 1.0
+            weights.append(w)
+            
+    if not vectors:
+        return np.zeros(wv.vector_size)
+    
+    return np.average(vectors, axis=0, weights=weights)
+
+def get_sentence_vec_concat(tokens, wv):
+    """方法 C: 拼接 (Concatenation - Mean + Max Pooling)
+    注：直接拼接單詞會導致長度不一，無法計算相似度。
+    常用的 '拼接' 基線是將 Mean Pooling 和 Max Pooling 的向量拼在一起。
+    """
+    vectors = [wv[t] for t in tokens if t in wv]
+    if not vectors:
+        # 拼接後維度翻倍
+        return np.zeros(wv.vector_size * 2)
+    
+    mean_vec = np.mean(vectors, axis=0)
+    max_vec = np.max(vectors, axis=0) # Element-wise max
+    return np.concatenate([mean_vec, max_vec])
+
+# === 加載模型 ===
+def load_models():
+    models = {}
+    
+    # Doc2Vec
+    if os.path.exists(DOC2VEC_MODEL_PATH):
+        print("Loading Doc2Vec...")
+        models['Doc2Vec'] = {'model': Doc2Vec.load(DOC2VEC_MODEL_PATH), 'type': 'doc2vec'}
+    
+    # Word2Vec
+    if os.path.exists(WORD2VEC_MODEL_PATH):
+        print("Loading Word2Vec...")
+        models['Word2Vec'] = {'model': Word2Vec.load(WORD2VEC_MODEL_PATH).wv, 'type': 'word_emb'}
+        
+    # FastText
+    if os.path.exists(FASTTEXT_MODEL_PATH):
+        print("Loading FastText...")
+        models['FastText'] = {'model': FastText.load(FASTTEXT_MODEL_PATH).wv, 'type': 'word_emb'}
+
+    # GloVe
+    if os.path.exists(GLOVE_MODEL_PATH):
+        print("Loading GloVe...")
+        models['GloVe'] = {'model': KeyedVectors.load(GLOVE_MODEL_PATH), 'type': 'word_emb'}
+        
+    return models
+
+# === 相似度計算 ===
+def calculate_similarity(model_info, method, sentence1, sentence2, idf_model=None):
+    tokens1 = preprocess_text(sentence1)
+    tokens2 = preprocess_text(sentence2)
+    
+    model = model_info['model']
+    model_type = model_info['type']
+    
+    vec1, vec2 = None, None
+    
+    if model_type == 'doc2vec':
+        # Doc2Vec 只有一種推斷方法，忽略 method 參數
+        vec1 = model.infer_vector(tokens1)
+        vec2 = model.infer_vector(tokens2)
+    elif model_type == 'word_emb':
+        if method == 'sum':
+            vec1 = get_sentence_vec_sum(tokens1, model)
+            vec2 = get_sentence_vec_sum(tokens2, model)
+        elif method == 'weighted_avg':
+            vec1 = get_sentence_vec_weighted_avg(tokens1, model, idf_model)
+            vec2 = get_sentence_vec_weighted_avg(tokens2, model, idf_model)
+        elif method == 'concat':
+            vec1 = get_sentence_vec_concat(tokens1, model)
+            vec2 = get_sentence_vec_concat(tokens2, model)
+        else: # 默認平均
+             vec1 = get_sentence_vec_weighted_avg(tokens1, model, None) # None IDF = Simple Avg
+             vec2 = get_sentence_vec_weighted_avg(tokens2, model, None)
+
+    # Cosine Similarity
+    norm1 = np.linalg.norm(vec1)
+    norm2 = np.linalg.norm(vec2)
+    if norm1 == 0 or norm2 == 0:
+        return 0.0
+    return np.dot(vec1, vec2) / (norm1 * norm2)
+
+# === 主評估邏輯 ===
+def evaluate_all(models, test_data):
+    results = {}
+    
+    # 準備 IDF 字典 (僅需一次)
+    all_sentences = []
+    for data in test_data:
+        all_sentences.append(data['sentence1'])
+        all_sentences.append(data['sentence2'])
+    idf_model = IDFCalculator(all_sentences)
+    
+    # 定義要測試的方法
+    methods = ['sum', 'weighted_avg', 'concat']
+    
+    for model_name, model_info in models.items():
+        if model_info['type'] == 'doc2vec':
+            # Doc2Vec 單獨跑一次
+            print(f"Evaluating {model_name}...")
+            res = run_evaluation(model_info, 'default', test_data, idf_model)
+            results[f"{model_name}"] = res
+        else:
+            # 詞向量模型跑三種方法
+            for method in methods:
+                run_name = f"{model_name} + {method.title()}"
+                print(f"Evaluating {run_name}...")
+                res = run_evaluation(model_info, method, test_data, idf_model)
+                results[run_name] = res
+                
+    return results
+
+def run_evaluation(model_info, method, test_data, idf_model):
+    human_scores = []
+    model_scores = []
+    
+    for data in test_data:
+        human_score = data['score']
+        sim = calculate_similarity(model_info, method, data['sentence1'], data['sentence2'], idf_model)
+        human_scores.append(human_score)
+        model_scores.append(sim)
+        
+    correlation, p_value = spearmanr(human_scores, model_scores)
+    return {'correlation': correlation, 'p_value': p_value}
+
 def load_test_data(file_path):
-    """加载测试数据"""
     test_data = []
     with open(file_path, 'r', encoding='utf-8') as f:
         for line in f:
@@ -46,96 +225,37 @@ def load_test_data(file_path):
                     'sentence1': data['sentence1'],
                     'sentence2': data['sentence2']
                 })
-    print(f"加载了 {len(test_data)} 条测试数据")
     return test_data
 
-def calculate_similarity(model, sentence1, sentence2):
-    """计算两个句子的相似度"""
-    # 预处理句子
-    tokens1 = preprocess_text(sentence1)
-    tokens2 = preprocess_text(sentence2)
-    
-    # 计算句子向量
-    vec1 = model.infer_vector(tokens1)
-    vec2 = model.infer_vector(tokens2)
-    
-    # 计算余弦相似度
-    similarity = np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
-    return similarity
-
-def evaluate_model(model, test_data):
-    """评估模型性能"""
-    human_scores = []
-    model_scores = []
-    
-    for data in test_data:
-        human_score = data['score']
-        sentence1 = data['sentence1']
-        sentence2 = data['sentence2']
-        
-        # 计算模型相似度
-        model_score = calculate_similarity(model, sentence1, sentence2)
-        
-        # 将相似度映射到0-5范围（与人类评分一致）
-        # 余弦相似度范围是[-1, 1]，我们将其映射到[0, 5]
-        mapped_score = (model_score + 1) * 2.5
-        
-        human_scores.append(human_score)
-        model_scores.append(mapped_score)
-    
-    # 计算Spearman相关系数
-    correlation, p_value = spearmanr(human_scores, model_scores)
-    
-    return {
-        'correlation': correlation,
-        'p_value': p_value,
-        'human_scores': human_scores,
-        'model_scores': model_scores
-    }
-
 def save_results(results):
-    """保存评估结果"""
     os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
-    
     with open(OUTPUT_PATH, 'w', encoding='utf-8') as f:
-        f.write("Doc2Vec Model Evaluation on STSBenchmark\n")
-        f.write("=" * 60 + "\n\n")
-        f.write(f"Spearman Correlation: {results['correlation']:.4f}\n")
-        f.write(f"P-value: {results['p_value']:.4e}\n")
-        f.write(f"Number of Samples: {len(results['human_scores'])}\n\n")
-        f.write("=" * 60 + "\n")
-        f.write("Evaluation completed.")
-    
-    print(f"结果已保存到: {OUTPUT_PATH}")
+        f.write("Text Embedding Methods Comparison\n")
+        f.write("Methods: Summation, Weighted Avg (TF-IDF), Concatenation (Mean+Max)\n")
+        f.write("=" * 80 + "\n\n")
+        
+        # 按相關係數排序
+        sorted_results = sorted(results.items(), key=lambda x: x[1]['correlation'], reverse=True)
+        
+        f.write(f"{'Model + Method':<40} | {'Spearman':<10} | {'P-value':<10}\n")
+        f.write("-" * 80 + "\n")
+        
+        for name, metrics in sorted_results:
+            f.write(f"{name:<40} | {metrics['correlation']:.4f}     | {metrics['p_value']:.2e}\n")
+            
+    print(f"\nDetailed results saved to {OUTPUT_PATH}")
 
 def main():
-    """主函数"""
-    # 检查模型文件是否存在
-    if not os.path.exists(MODEL_PATH):
-        print(f"错误: 模型文件 {MODEL_PATH} 不存在")
-        print("请先运行 dv_train.py 训练模型")
-        return
-    
-    # 加载模型
-    print(f"加载模型: {MODEL_PATH}")
-    model = Doc2Vec.load(MODEL_PATH)
-    print("模型加载完成")
-    
-    # 加载测试数据
     test_data = load_test_data(TEST_DATA_PATH)
+    print(f"Loaded {len(test_data)} test samples.")
     
-    # 评估模型
-    print("开始评估模型...")
-    results = evaluate_model(model, test_data)
-    
-    # 打印结果
-    print(f"Spearman Correlation: {results['correlation']:.4f}")
-    print(f"P-value: {results['p_value']:.4e}")
-    
-    # 保存结果
+    models = load_models()
+    if not models:
+        print("No models found. Please train models first.")
+        return
+
+    results = evaluate_all(models, test_data)
     save_results(results)
-    
-    print("评估完成!")
 
 if __name__ == "__main__":
     main()

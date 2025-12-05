@@ -7,12 +7,6 @@ import nltk
 # 下载必要的nltk数据
 nltk.download('punkt', quiet=True)
 
-# 加载停用词
-stopwords = set()
-with open('baidu_stopwords.txt', 'r', encoding='utf-8') as f:
-    for line in f:
-        stopwords.add(line.strip())
-
 def preprocess_text(text):
     # 移除特殊字符和数字
     text = re.sub(r'[^a-zA-Z\s]', '', text)
@@ -20,8 +14,8 @@ def preprocess_text(text):
     text = text.lower()
     # 分词
     tokens = word_tokenize(text)
-    # 去除停用词和空词
-    tokens = [token for token in tokens if token not in stopwords and token.strip()]
+    # 去除空词，不再使用停用词
+    tokens = [token for token in tokens if token.strip()]
     return tokens
 
 def load_corpus(file_path):
@@ -55,7 +49,7 @@ def train_doc2vec_model(tagged_docs, model_dir='model_doc2vec'):
         vector_size=100,          # 向量维度
         window=5,                 # 上下文窗口大小
         min_count=5,              # 忽略出现次数少于此值的词
-        workers=4,                # 训练使用的线程数
+        workers=os.cpu_count(),   # 使用所有可用CPU核心加速训练
         epochs=20,                # 训练迭代次数
         dm=1,                     # 使用分布式内存模型
         alpha=0.025,              # 初始学习率
