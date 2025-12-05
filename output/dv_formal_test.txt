@@ -1,0 +1,9 @@
+Doc2Vec Model Evaluation on STSBenchmark
+============================================================
+
+Spearman Correlation: 0.3534
+P-value: 7.9274e-42
+Number of Samples: 1379
+
+============================================================
+Evaluation completed.

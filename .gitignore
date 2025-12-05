@@ -1,5 +1,6 @@
 corpus/
 __pycache__/
 model_fasttext/
-model_lsa/
 model_word2vec/
+model_glove/
+model_doc2vec/

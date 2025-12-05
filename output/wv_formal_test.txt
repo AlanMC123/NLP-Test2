@@ -1,0 +1,20 @@
+Word Similarity Model Evaluation
+==================================================
+
+WORD2VEC Results:
+- Spearman Correlation: 0.6331
+- P-value: 1.3058e-40
+- Number of Samples: 350
+
+FASTTEXT Results:
+- Spearman Correlation: 0.5757
+- P-value: 1.5240e-32
+- Number of Samples: 353
+
+GLOVE Results:
+- Spearman Correlation: 0.6376
+- P-value: 2.4398e-41
+- Number of Samples: 350
+
+==================================================
+Evaluation completed.

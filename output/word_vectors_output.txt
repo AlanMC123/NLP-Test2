@@ -1,112 +1,85 @@
+Word Vectors Model Comparison
+==================================================
 
-=== 词对相似度比较 ===
+1. Word Similarity Tests
+------------------------------
 
-Word2Vec 模型：
-  南京 与 古都 的相似度：0.4838
-  中国 与 美国 的相似度：0.2305
-  北京 与 上海 的相似度：0.8478
-  计算机 与 编程 的相似度：0.8615
-  科学 与 技术 的相似度：0.6480
-  学习 与 研究 的相似度：0.4775
-  数学 与 物理 的相似度：0.8545
-  苹果 与 香蕉 的相似度：0.5882
+WORD2VEC Results:
+  Similarity between 'king' and 'queen': 0.6176
+  Similarity between 'man' and 'woman': 0.6888
+  Similarity between 'china' and 'beijing': 0.5856
+  Similarity between 'america' and 'washington': 0.1389
+  Similarity between 'king' and 'man': 0.2711
+  Similarity between 'queen' and 'woman': 0.3481
 
---------------------------------------------------
+FASTTEXT Results:
+  Similarity between 'king' and 'queen': 0.6316
+  Similarity between 'man' and 'woman': 0.6816
+  Similarity between 'china' and 'beijing': 0.5838
+  Similarity between 'america' and 'washington': 0.2583
+  Similarity between 'king' and 'man': 0.2200
+  Similarity between 'queen' and 'woman': 0.3670
 
-fastText 模型：
-  南京 与 古都 的相似度：0.5701
-  中国 与 美国 的相似度：0.2082
-  北京 与 上海 的相似度：0.8689
-  计算机 与 编程 的相似度：0.8414
-  科学 与 技术 的相似度：0.6759
-  学习 与 研究 的相似度：0.4664
-  数学 与 物理 的相似度：0.8817
-  苹果 与 香蕉 的相似度：0.5282
+GLOVE Results:
+  Similarity between 'king' and 'queen': 0.6425
+  Similarity between 'man' and 'woman': 0.6969
+  Similarity between 'china' and 'beijing': 0.5917
+  Similarity between 'america' and 'washington': 0.1365
+  Similarity between 'king' and 'man': 0.2596
+  Similarity between 'queen' and 'woman': 0.3908
 
---------------------------------------------------
 
-LSA 模型：
-  南京 与 古都 的相似度：0.2213
-  中国 与 美国 的相似度：-0.0164
-  北京 与 上海 的相似度：-0.0331
-  计算机 与 编程 的相似度：0.6536
-  科学 与 技术 的相似度：0.2350
-  学习 与 研究 的相似度：0.1576
-  数学 与 物理 的相似度：0.3565
-  苹果 与 香蕉 的相似度：0.1986
+2. Most Similar Words Tests
+------------------------------
 
---------------------------------------------------
+WORD2VEC Results:
+  Most similar to 'king': regent(0.684), cnut(0.679), monarch(0.674), prince(0.673), harthacnut(0.669)
+  Most similar to 'queen': princess(0.681), consort(0.632), monarch(0.619), king(0.618), coronation(0.617)
+  Most similar to 'man': woman(0.689), person(0.613), boy(0.608), beggar(0.596), girl(0.560)
+  Most similar to 'woman': girl(0.721), man(0.689), lover(0.689), prostitute(0.679), child(0.652)
+  Most similar to 'china': taiwan(0.756), asia(0.717), japan(0.681), india(0.678), xinjiang(0.674)
+  Most similar to 'beijing': guangzhou(0.714), nanjing(0.680), tianjin(0.677), shanghai(0.655), olympics(0.641)
+  Most similar to 'america': american(0.750), africa(0.686), korea(0.649), carolinian(0.638), carolina(0.629)
+  Most similar to 'washington': philadelphia(0.662), denver(0.640), baltimore(0.599), maryland(0.591), york(0.589)
 
-=== 词聚类效果比较 ===
+FASTTEXT Results:
+  Most similar to 'king': kingis(0.823), kingaroy(0.805), prince(0.732), kinglake(0.731), princes(0.719)
+  Most similar to 'queen': queene(0.905), queenly(0.880), queenie(0.867), macqueen(0.821), queet(0.750)
+  Most similar to 'man': woman(0.682), womad(0.641), womanly(0.634), handsome(0.598), horsewoman(0.583)
+  Most similar to 'woman': madwoman(0.889), womanly(0.886), charwoman(0.832), womanhood(0.811), assawoman(0.811)
+  Most similar to 'china': chinchina(0.880), chinandega(0.866), chinautla(0.865), kachina(0.824), chinamita(0.814)
+  Most similar to 'beijing': shijing(0.893), bianjing(0.760), yanjing(0.754), nanjing(0.750), suanjing(0.723)
+  Most similar to 'america': ameri(0.872), comerica(0.865), transamerica(0.864), americano(0.851), americanos(0.846)
+  Most similar to 'washington': ashington(0.926), washingtonville(0.913), washingtons(0.906), washingtonian(0.872), lushington(0.858)
 
-Word2Vec 模型：
+GLOVE Results:
+  Most similar to 'king': throne(0.709), pretender(0.699), haakon(0.694), cnut(0.685), monarch(0.680)
+  Most similar to 'queen': princess(0.718), king(0.642), bedchamber(0.632), monarch(0.622), consort(0.614)
+  Most similar to 'man': woman(0.697), boy(0.633), person(0.594), beggar(0.591), girl(0.582)
+  Most similar to 'woman': girl(0.740), prostitute(0.705), lover(0.700), man(0.697), seducing(0.650)
+  Most similar to 'china': taiwan(0.787), tibet(0.711), asia(0.711), japan(0.688), india(0.684)
+  Most similar to 'beijing': guangzhou(0.697), nanjing(0.663), shanghai(0.654), tianjin(0.631), olympic(0.628)
+  Most similar to 'america': american(0.747), africa(0.686), carolinian(0.657), carolina(0.626), korea(0.617)
+  Most similar to 'washington': philadelphia(0.611), lafayette(0.599), baltimore(0.588), maryland(0.586), york(0.566)
 
-  国家 组：
-    有效词数：5 / 5
-    组内平均相似度：0.4976
-    有效词：中国, 美国, 日本, 德国, 法国
 
-  城市 组：
-    有效词数：5 / 5
-    组内平均相似度：0.7674
-    有效词：北京, 上海, 广州, 深圳, 南京
+3. Word Analogy Tests
+------------------------------
 
-  学科 组：
-    有效词数：5 / 5
-    组内平均相似度：0.7172
-    有效词：数学, 物理, 化学, 生物, 计算机
+WORD2VEC Results:
+  king : man :: queen : woman (similarity: 0.7144)
+  china : beijing :: america : american (similarity: 0.5485)
+  man : woman :: king : queen (similarity: 0.6913)
 
-  水果 组：
-    有效词数：5 / 5
-    组内平均相似度：0.6371
-    有效词：苹果, 香蕉, 橙子, 葡萄, 西瓜
+FASTTEXT Results:
+  king : man :: queen : woman (similarity: 0.6943)
+  china : beijing :: america : comerica (similarity: 0.6060)
+  man : woman :: king : enthrone (similarity: 0.7206)
 
---------------------------------------------------
+GLOVE Results:
+  king : man :: queen : woman (similarity: 0.7195)
+  china : beijing :: america : american (similarity: 0.5455)
+  man : woman :: king : queen (similarity: 0.7086)
 
-fastText 模型：
-
-  国家 组：
-    有效词数：5 / 5
-    组内平均相似度：0.4985
-    有效词：中国, 美国, 日本, 德国, 法国
-
-  城市 组：
-    有效词数：5 / 5
-    组内平均相似度：0.7828
-    有效词：北京, 上海, 广州, 深圳, 南京
-
-  学科 组：
-    有效词数：5 / 5
-    组内平均相似度：0.7364
-    有效词：数学, 物理, 化学, 生物, 计算机
-
-  水果 组：
-    有效词数：5 / 5
-    组内平均相似度：0.7040
-    有效词：苹果, 香蕉, 橙子, 葡萄, 西瓜
-
---------------------------------------------------
-
-LSA 模型：
-
-  国家 组：
-    有效词数：5 / 5
-    组内平均相似度：0.0138
-    有效词：中国, 美国, 日本, 德国, 法国
-
-  城市 组：
-    有效词数：5 / 5
-    组内平均相似度：0.0861
-    有效词：北京, 上海, 广州, 深圳, 南京
-
-  学科 组：
-    有效词数：5 / 5
-    组内平均相似度：0.0220
-    有效词：数学, 物理, 化学, 生物, 计算机
-
-  水果 组：
-    有效词数：3 / 5
-    组内平均相似度：0.0203
-    有效词：苹果, 香蕉, 葡萄
-
---------------------------------------------------
+==================================================
+Model comparison completed.
