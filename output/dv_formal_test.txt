@@ -13,4 +13,4 @@ GloVe + Concat                           | 0.5002     | 3.30e-88
 Word2Vec + Concat                        | 0.4950     | 4.02e-86
 FastText + Sum                           | 0.4835     | 1.05e-81
 FastText + Concat                        | 0.4292     | 6.70e-63
-Doc2Vec                                  | 0.3979     | 1.58e-53
+Doc2Vec                                  | 0.3974     | 2.20e-53
