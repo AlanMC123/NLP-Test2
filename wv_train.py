@@ -75,10 +75,10 @@ def train_fasttext(corpus):
         sentences=corpus,
         vector_size=100,  # 向量維度
         window=5,         # 上下文窗口大小
-        min_count=5,      # 過濾低頻詞
+        min_count=50,      # 過濾低頻詞
         workers=os.cpu_count(),
         epochs=15,        # [建議增加] 增加訓練輪數，讓模型讀更多次語料，強化語義學習
-        min_n=5,          # [關鍵修改] 原為3。提高到5，忽略過短的字根，減少"拼寫相似"的干擾
+        min_n=3,          # [關鍵修改] 原為3。提高到5，忽略過短的字根，減少"拼寫相似"的干擾
         max_n=6,          # [保持默認] 子詞最大長度
         word_ngrams=1,    # 使用 n-gram
         callbacks=[callback]

@@ -13,12 +13,12 @@ WORD2VEC Results:
   Similarity between 'queen' and 'woman': 0.4206
 
 FASTTEXT Results:
-  Similarity between 'king' and 'queen': 0.6788
-  Similarity between 'man' and 'woman': 0.7059
-  Similarity between 'china' and 'beijing': 0.6079
-  Similarity between 'america' and 'washington': 0.3554
-  Similarity between 'king' and 'man': 0.2709
-  Similarity between 'queen' and 'woman': 0.4505
+  Similarity between 'king' and 'queen': 0.6765
+  Similarity between 'man' and 'woman': 0.7618
+  Similarity between 'china' and 'beijing': 0.6847
+  Similarity between 'america' and 'washington': 0.2718
+  Similarity between 'king' and 'man': 0.3458
+  Similarity between 'queen' and 'woman': 0.4595
 
 GLOVE Results:
   Similarity between 'king' and 'queen': 0.6786
@@ -43,14 +43,14 @@ WORD2VEC Results:
   Most similar to 'washington': kansas(0.647), houston(0.642), denver(0.633), baltimore(0.617), maryland(0.615)
 
 FASTTEXT Results:
-  Most similar to 'king': kingis(0.831), kingaroy(0.816), prince(0.793), princedom(0.764), kinglake(0.748)
-  Most similar to 'queen': queene(0.906), queenly(0.888), queenie(0.872), macqueen(0.819), princess(0.792)
-  Most similar to 'man': woman(0.706), womad(0.674), boy(0.670), girl(0.641), horsewoman(0.615)
-  Most similar to 'woman': madwoman(0.908), charwoman(0.872), womanly(0.837), kinswoman(0.835), assawoman(0.828)
-  Most similar to 'china': chinchina(0.881), kachina(0.860), chinautla(0.841), chinandega(0.837), taiwan(0.828)
-  Most similar to 'beijing': shijing(0.875), bianjing(0.758), shanghai(0.758), nanjing(0.754), yanjing(0.744)
-  Most similar to 'america': ameri(0.878), comerica(0.857), sudamerica(0.837), transamerica(0.837), americanos(0.834)
-  Most similar to 'washington': ashington(0.931), washingtonville(0.920), washingtons(0.891), lushington(0.874), washingtonian(0.863)
+  Most similar to 'king': prince(0.795), kingpin(0.772), kingship(0.747), emperor(0.733), regent(0.726)
+  Most similar to 'queen': princess(0.805), prince(0.749), elizabeth(0.716), mcqueen(0.709), anne(0.699)
+  Most similar to 'man': woman(0.762), henchman(0.671), lad(0.669), swordsman(0.660), soldier(0.650)
+  Most similar to 'woman': womanhood(0.839), womanizer(0.791), girl(0.766), man(0.762), catwoman(0.753)
+  Most similar to 'china': taiwan(0.849), indonesia(0.827), thailand(0.816), indochina(0.810), india(0.794)
+  Most similar to 'beijing': nanjing(0.818), taipei(0.768), guangzhou(0.752), shanghai(0.732), tianjin(0.724)
+  Most similar to 'america': americana(0.829), africa(0.796), americas(0.789), american(0.746), korea(0.737)
+  Most similar to 'washington': arlington(0.754), covington(0.751), birchington(0.750), baltimore(0.735), bloomington(0.733)
 
 GLOVE Results:
   Most similar to 'king': prince(0.743), regent(0.739), monarch(0.717), confessor(0.713), cnut(0.708)
@@ -72,9 +72,9 @@ WORD2VEC Results:
   man : woman :: king : queen (similarity: 0.7255)
 
 FASTTEXT Results:
-  king : man :: queen : woman (similarity: 0.7379)
-  china : beijing :: america : comerica (similarity: 0.5717)
-  man : woman :: king : queen (similarity: 0.7484)
+  king : man :: queen : woman (similarity: 0.7839)
+  china : beijing :: america : americana (similarity: 0.5566)
+  man : woman :: king : queen (similarity: 0.7693)
 
 GLOVE Results:
   king : man :: queen : woman (similarity: 0.7403)

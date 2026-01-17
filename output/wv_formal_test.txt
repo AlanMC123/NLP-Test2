@@ -7,8 +7,8 @@ WORD2VEC Results:
 - Number of Samples: 353
 
 FASTTEXT Results:
-- Spearman Correlation: 0.5646
-- P-value: 4.1635e-31
+- Spearman Correlation: 0.5417
+- P-value: 2.6129e-28
 - Number of Samples: 353
 
 GLOVE Results:

@@ -4,13 +4,13 @@ Methods: Summation, Weighted Avg (TF-IDF), Concatenation (Mean+Max)
 
 Model + Method                           | Spearman   | P-value   
 --------------------------------------------------------------------------------
+FastText + Weighted_Avg                  | 0.5388     | 1.20e-104
 Word2Vec + Weighted_Avg                  | 0.5272     | 1.73e-99
 GloVe + Weighted_Avg                     | 0.5267     | 2.95e-99
-FastText + Weighted_Avg                  | 0.5259     | 6.61e-99
+FastText + Sum                           | 0.5055     | 2.41e-90
 Word2Vec + Sum                           | 0.5044     | 7.21e-90
 GloVe + Sum                              | 0.5039     | 1.10e-89
 GloVe + Concat                           | 0.5002     | 3.30e-88
 Word2Vec + Concat                        | 0.4950     | 4.02e-86
-FastText + Sum                           | 0.4835     | 1.05e-81
-FastText + Concat                        | 0.4292     | 6.70e-63
-Doc2Vec                                  | 0.3974     | 2.20e-53
+FastText + Concat                        | 0.4412     | 8.80e-67
+Doc2Vec                                  | 0.3970     | 2.88e-53
